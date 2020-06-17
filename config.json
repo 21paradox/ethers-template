@@ -1,7 +1,7 @@
 {
-  "private_key": "24C4FE6063E62710EAD956611B71825B778B041B18ED53118CE5DA5F02E494BA",
-  "network": "kovan",
-  "ERC20": "0x65D9DB4adB62516E87FacB0DBCA70af977ba2C94",
+  "private_key": "6d8b0b2e3700b904b3b63cf69b320e6575a06679281b62f1df7b6ad17c3828e3",
+  "network": "testnet",
+  "ERC20": "0x8bdd24f8911242e5f33c791b1c0b00985bf40fa4",
   "name": "Kanchan Coin",
   "symbol": "SNK",
   "total_supply": "1000000000000000000000000",

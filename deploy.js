@@ -1,6 +1,7 @@
 const ethers = require("ethers");
 const config = require("./config.json");
 const fs = require("fs-extra");
+const { Conflux } = require('js-conflux-sdk');
 
 const provider = ethers.getDefaultProvider(config.network);
 
@@ -11,19 +12,27 @@ let compiled = require(`./build/${process.argv[2]}.json`);
 
 (async () => {
     console.log(`\nDeploying ${process.argv[2]} in ${config.network}...`);
-    let contract = new ethers.ContractFactory(
-        compiled.abi,
-        compiled.bytecode,
-        wallet
-    );
+    const cfx = new Conflux({
+        url: 'http://wallet-testnet-jsonrpc.conflux-chain.org:12537',
+        logger: console,
+    });
 
-    let instance = await contract.deploy(config.decimals, config.symbol, config.name, config.total_supply);
-    console.log(`deployed at ${instance.address}`);
-    config[`${process.argv[2]}`] = instance.address;
-    console.log("Waiting for the contract to get mined...");
-    await instance.deployed();
-    console.log("Contract deployed");
-    fs.outputJsonSync(
+    const account = cfx.Account('0x'  + config.private_key); // create account instance
+    const contract = cfx.Contract({
+        abi: compiled.abi,
+        bytecode: '0x' + compiled.bytecode
+    });
+    // deploy the contract, and get `contractCreated`
+    const receipt = await contract.constructor(config.decimals, config.symbol, config.name, config.total_supply).sendTransaction({
+        from: account,
+    })
+    .confirmed();
+
+    console.log(receipt, 'receipt'); // receipt.contractCreated: 0x8de528bc539e9be1fe5682f597e1e83f6b4e841b
+    console.log("Contract deployed", receipt.transactionHash);
+    config[`${process.argv[2]}`] = receipt.contractCreated;
+
+     fs.outputJsonSync(
         "config.json",
         config,
         {
@@ -31,5 +40,4 @@ let compiled = require(`./build/${process.argv[2]}.json`);
             EOL: "\n"
         }
     );
-
 })();
